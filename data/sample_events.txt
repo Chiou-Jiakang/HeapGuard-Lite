@@ -1,0 +1,10 @@
+PHISHING_SMS,user=tim,ip=unknown,message=Your account is abnormal. Click this link to verify.
+WEAK_PASSWORD,user=tim,ip=local,message=password=123456
+SUSPICIOUS_FILE,user=tim,ip=local,message=downloaded invoice.exe
+LOGIN_FAIL,user=admin,ip=192.168.1.10,message=failed login attempt
+SQL_INJECTION,user=guest,ip=10.0.0.5,message=' OR 1=1 --
+XSS_ATTEMPT,user=guest,ip=10.0.0.8,message=<script>alert('xss')</script>
+NORMAL_LOGIN,user=mary,ip=192.168.1.12,message=login successful
+LOGIN_FAIL,user=root,ip=192.168.1.20,message=multiple failed login attempts with password
+SUSPICIOUS_FILE,user=alice,ip=local,message=opened unknown setup.exe file
+PHISHING_SMS,user=bob,ip=unknown,message=Click this link immediately to reset your password.
