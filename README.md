@@ -38,6 +38,7 @@
 - 已將 `Export report` 選單功能接上 `ReportGenerator`。
 - 已完成 `Add custom event` 功能，使用者可以透過終端機自行新增一筆事件。
 - 已建立多個測試檔案，用來檢查各模組是否能正常運作。
+- 已補充專案設計說明、複雜度分析、測試指南與範例輸出文件。
 - 已透過多次 GitHub commit 與 push 記錄專案逐步開發進度。
 
 ## 目前可使用功能
@@ -105,10 +106,28 @@ HeapGuard-Lite/
 ├── data/
 │   └── sample_events.txt
 ├── docs/
+│   ├── design_notes.md
+│   ├── complexity_analysis.md
+│   ├── testing_guide.md
+│   └── sample_output.md
 ├── output/
 ├── README.md
 └── .gitignore
 ```
+
+## 補充文件
+
+- `docs/design_notes.md`
+  - 說明本專案的設計想法、資料流程、主要類別分工，以及為什麼使用 Queue、Min Heap 與 Merge Sort。
+
+- `docs/complexity_analysis.md`
+  - 整理本專案主要模組的時間複雜度與空間複雜度，例如 EventParser、EventAnalyzer、EventQueue、MinHeap、Merge Sort 與 ReportGenerator。
+
+- `docs/testing_guide.md`
+  - 提供主流程測試、自訂事件測試、防呆測試與單一模組測試方式。
+
+- `docs/sample_output.md`
+  - 收錄主選單、事件載入、Top-K 高風險事件、完整排序、自訂事件與報告輸出的範例畫面文字。
 
 ## 主要檔案說明
 
