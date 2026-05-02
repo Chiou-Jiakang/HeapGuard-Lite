@@ -193,13 +193,44 @@ public class ConsoleUI {
     }
 
     private void exportReport() {
-        System.out.println("Export report selected.");
+        if (loadedEvents.isEmpty()) {
+            System.out.println("No events loaded. Please load sample events first.");
+            return;
+        }
+
+        boolean hasAnalyzedEvents = false;
+
+        for (SecurityEvent event : loadedEvents) {
+            if (!event.getRiskLevel().equals("UNKNOWN")) {
+                hasAnalyzedEvents = true;
+                break;
+            }
+        }
+
+        if (!hasAnalyzedEvents) {
+            System.out.println("Events have not been analyzed yet. Please analyze events first.");
+            return;
+        }
+
+        EventSorter sorter = new EventSorter();
+        ArrayList<SecurityEvent> sortedEvents = sorter.sortByRiskScore(loadedEvents);
+
+        ReportGenerator reportGenerator = new ReportGenerator();
+
+        System.out.println("Exporting report...");
+
+        reportGenerator.exportReport(
+                loadedEvents,
+                sortedEvents,
+                "output/sample_report.txt");
     }
 
     private void showComplexitySummary() {
         System.out.println();
         System.out.println("Complexity Summary:");
-        System.out.println("- Queue enqueue/dequeue: O(1) or O(n), depending on implementation");
+        System.out.println("- EventParser file loading: O(n)");
+        System.out.println("- EventAnalyzer risk scoring: O(n * m)");
+        System.out.println("- Queue enqueue: O(1)");
         System.out.println("- Current EventQueue dequeue with ArrayList.remove(0): O(n)");
         System.out.println("- MinHeap insertion: O(log n)");
         System.out.println("- MinHeap extraction: O(log n)");
