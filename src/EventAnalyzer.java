@@ -1,11 +1,15 @@
 public class EventAnalyzer {
+
     public void analyze(SecurityEvent event) {
+        event.resetAnalysis();
+
         int score = 0;
 
         String type = event.getType().toUpperCase();
         String user = event.getUser().toLowerCase();
         String message = event.getMessage().toLowerCase();
 
+        // Score by event type
         if (type.equals("PHISHING_SMS")) {
             score += 80;
             event.addReason("Phishing SMS event detected.");

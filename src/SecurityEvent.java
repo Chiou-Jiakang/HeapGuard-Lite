@@ -81,6 +81,13 @@ public class SecurityEvent {
         reasons.add(reason);
     }
 
+    public void resetAnalysis() {
+        this.riskScore = 0;
+        this.priority = 100;
+        this.riskLevel = "UNKNOWN";
+        this.reasons.clear();
+    }
+
     public String getShortSummary() {
         return "[" + riskLevel + "] "
                 + type

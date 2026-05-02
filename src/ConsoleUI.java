@@ -104,7 +104,85 @@ public class ConsoleUI {
     }
 
     private void addCustomEvent() {
-        System.out.println("Add custom event selected.");
+        String type = selectEventType();
+
+        if (type == null) {
+            System.out.println("Custom event creation cancelled.");
+            return;
+        }
+
+        String user = readNonEmptyLine("Enter user: ");
+        String ip = readNonEmptyLine("Enter IP: ");
+        String message = readNonEmptyLine("Enter message: ");
+
+        int id = loadedEvents.size() + 1;
+
+        SecurityEvent event = new SecurityEvent(
+                id,
+                type,
+                user,
+                ip,
+                message);
+
+        loadedEvents.add(event);
+        eventQueue.enqueue(event);
+
+        System.out.println("Custom event added successfully.");
+        System.out.println(event.getShortSummary());
+        System.out.println("Please run Analyze events before viewing rankings or exporting reports.");
+    }
+
+    private String selectEventType() {
+        while (true) {
+            System.out.println();
+            System.out.println("Select event type:");
+            System.out.println("1. PHISHING_SMS");
+            System.out.println("2. WEAK_PASSWORD");
+            System.out.println("3. SUSPICIOUS_FILE");
+            System.out.println("4. LOGIN_FAIL");
+            System.out.println("5. SQL_INJECTION");
+            System.out.println("6. XSS_ATTEMPT");
+            System.out.println("7. NORMAL_LOGIN");
+            System.out.println("0. Cancel");
+            System.out.print("Choose event type: ");
+
+            int choice = readChoice();
+
+            switch (choice) {
+                case 1:
+                    return "PHISHING_SMS";
+                case 2:
+                    return "WEAK_PASSWORD";
+                case 3:
+                    return "SUSPICIOUS_FILE";
+                case 4:
+                    return "LOGIN_FAIL";
+                case 5:
+                    return "SQL_INJECTION";
+                case 6:
+                    return "XSS_ATTEMPT";
+                case 7:
+                    return "NORMAL_LOGIN";
+                case 0:
+                    return null;
+                default:
+                    System.out.println("Invalid event type. Please choose 0-7.");
+                    break;
+            }
+        }
+    }
+
+    private String readNonEmptyLine(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            if (!input.isEmpty()) {
+                return input;
+            }
+
+            System.out.println("Input cannot be empty. Please try again.");
+        }
     }
 
     private void analyzeEvents() {
