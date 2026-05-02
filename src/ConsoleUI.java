@@ -161,7 +161,35 @@ public class ConsoleUI {
     }
 
     private void showFullRanking() {
-        System.out.println("Show full ranking selected.");
+        if (loadedEvents.isEmpty()) {
+            System.out.println("No events loaded. Please load sample events first.");
+            return;
+        }
+
+        boolean hasAnalyzedEvents = false;
+
+        for (SecurityEvent event : loadedEvents) {
+            if (!event.getRiskLevel().equals("UNKNOWN")) {
+                hasAnalyzedEvents = true;
+                break;
+            }
+        }
+
+        if (!hasAnalyzedEvents) {
+            System.out.println("Events have not been analyzed yet. Please analyze events first.");
+            return;
+        }
+
+        EventSorter sorter = new EventSorter();
+        ArrayList<SecurityEvent> sortedEvents = sorter.sortByRiskScore(loadedEvents);
+
+        System.out.println();
+        System.out.println("Full Risk Ranking:");
+
+        for (int i = 0; i < sortedEvents.size(); i++) {
+            SecurityEvent event = sortedEvents.get(i);
+            System.out.println((i + 1) + ". " + event.getShortSummary());
+        }
     }
 
     private void exportReport() {
