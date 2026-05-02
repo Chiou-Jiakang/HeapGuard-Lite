@@ -1,10 +1,15 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ConsoleUI {
     private Scanner scanner;
+    private EventQueue eventQueue;
+    private ArrayList<SecurityEvent> loadedEvents;
 
     public ConsoleUI() {
         scanner = new Scanner(System.in);
+        eventQueue = new EventQueue();
+        loadedEvents = new ArrayList<>();
     }
 
     public void start() {
@@ -85,7 +90,17 @@ public class ConsoleUI {
     }
 
     private void loadSampleEvents() {
-        System.out.println("Load sample events selected.");
+        EventParser parser = new EventParser();
+
+        loadedEvents = parser.loadEventsFromFile("data/sample_events.txt");
+
+        eventQueue.clear();
+
+        for (SecurityEvent event : loadedEvents) {
+            eventQueue.enqueue(event);
+        }
+
+        System.out.println("Loaded " + loadedEvents.size() + " events into the event queue.");
     }
 
     private void addCustomEvent() {
@@ -93,11 +108,56 @@ public class ConsoleUI {
     }
 
     private void analyzeEvents() {
-        System.out.println("Analyze events selected.");
+        if (loadedEvents.isEmpty()) {
+            System.out.println("No events loaded. Please load sample events first.");
+            return;
+        }
+
+        EventAnalyzer analyzer = new EventAnalyzer();
+
+        for (SecurityEvent event : loadedEvents) {
+            analyzer.analyze(event);
+        }
+
+        System.out.println("Analyzed " + loadedEvents.size() + " events.");
     }
 
     private void showTopKAlerts() {
-        System.out.println("Show Top-K alerts selected.");
+        if (loadedEvents.isEmpty()) {
+            System.out.println("No events loaded. Please load sample events first.");
+            return;
+        }
+
+        boolean hasAnalyzedEvents = false;
+
+        for (SecurityEvent event : loadedEvents) {
+            if (!event.getRiskLevel().equals("UNKNOWN")) {
+                hasAnalyzedEvents = true;
+                break;
+            }
+        }
+
+        if (!hasAnalyzedEvents) {
+            System.out.println("Events have not been analyzed yet. Please analyze events first.");
+            return;
+        }
+
+        Minheap heap = new Minheap();
+
+        for (SecurityEvent event : loadedEvents) {
+            heap.insert(event);
+        }
+
+        int k = 5;
+        int count = Math.min(k, heap.size());
+
+        System.out.println();
+        System.out.println("Top " + count + " High-Risk Alerts:");
+
+        for (int i = 1; i <= count; i++) {
+            SecurityEvent event = heap.extractMin();
+            System.out.println(i + ". " + event.getShortSummary());
+        }
     }
 
     private void showFullRanking() {
@@ -111,7 +171,8 @@ public class ConsoleUI {
     private void showComplexitySummary() {
         System.out.println();
         System.out.println("Complexity Summary:");
-        System.out.println("- Queue enqueue/dequeue: O(1)");
+        System.out.println("- Queue enqueue/dequeue: O(1) or O(n), depending on implementation");
+        System.out.println("- Current EventQueue dequeue with ArrayList.remove(0): O(n)");
         System.out.println("- MinHeap insertion: O(log n)");
         System.out.println("- MinHeap extraction: O(log n)");
         System.out.println("- Top-K extraction: O(k log n)");
