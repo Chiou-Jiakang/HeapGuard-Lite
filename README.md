@@ -6,14 +6,14 @@
 - 本專案以「個人網路安全提醒」作為情境，模擬使用者可能遇到的安全事件，例如登入失敗、弱密碼、可疑檔案、釣魚訊息、疑似 SQL injection 與疑似 XSS 攻擊等。
 - 本專案並不是實際可用於真實資安防護的系統，而是一個以資料結構與 Java 實作練習為核心的作品。
 - 本專案的主要目的，是展示如何將 Queue、Min Heap、Merge Sort、ArrayList 等資料結構與演算法應用到具體情境中。
-- 本專案目前採用本地端文字檔作為資料來源，不需要連接網路、資料庫或外部 API。
+- 本專案目前採用本地端文字檔與使用者手動輸入作為事件來源，不需要連接網路、資料庫或外部 API。
 
 ## 專案目標
 
 - 使用 Java 建立一個可在終端機操作的簡易安全事件分析工具。
 - 將模擬的安全提醒事件轉換成程式可以處理的 `SecurityEvent` 物件。
 - 根據事件類型、使用者身分與訊息內容，計算每筆事件的風險分數。
-- 使用 Queue 模擬事件依序進入系統的處理流程。
+- 使用 Queue 保存載入或新增後的待處理事件。
 - 使用 Min Heap 取出前 K 筆最高風險事件。
 - 使用 Merge Sort 產生完整風險排序。
 - 將分析結果輸出成文字報告。
@@ -25,8 +25,9 @@
 - 已完成基本選單輸入判斷，可處理 0 到 7 的功能選項。
 - 已完成錯誤輸入處理，例如輸入非數字時不會讓程式直接崩潰。
 - 已建立 `SecurityEvent` 資料模型，用來表示一筆安全事件。
+- 已在 `SecurityEvent` 中加入 `resetAnalysis()`，避免重複分析時風險原因重複累積。
 - 已建立 `EventAnalyzer`，可根據規則計算事件風險分數與風險等級。
-- 已建立 `EventQueue`，用來以 Queue 的方式管理待處理事件。
+- 已建立 `EventQueue`，用來保存載入後或使用者新增後的待處理事件。
 - 已建立 `EventParser`，可從本地端文字檔讀取並解析事件資料。
 - 已建立 `sample_events.txt`，作為本專案的本地端範例事件資料。
 - 已建立 `MinHeap`，可根據事件 priority 取出高風險事件。
@@ -35,6 +36,7 @@
 - 已將 `Show full ranking` 選單功能接上 `EventSorter`。
 - 已建立 `ReportGenerator`，可將分析結果輸出成文字報告。
 - 已將 `Export report` 選單功能接上 `ReportGenerator`。
+- 已完成 `Add custom event` 功能，使用者可以透過終端機自行新增一筆事件。
 - 已建立多個測試檔案，用來檢查各模組是否能正常運作。
 - 已透過多次 GitHub commit 與 push 記錄專案逐步開發進度。
 
@@ -43,31 +45,36 @@
 - `1. Load sample events`
   - 從 `data/sample_events.txt` 讀取本地端範例事件資料。
   - 使用 `EventParser` 將文字資料轉換成 `SecurityEvent` 物件。
-  - 將讀取到的事件放入 `EventQueue`。
+  - 將讀取到的事件放入 `loadedEvents` 與 `EventQueue`。
 
 - `2. Add custom event`
-  - 預計讓使用者自行新增一筆安全事件。
-  - 目前尚未接上正式輸入流程。
+  - 讓使用者透過終端機自行新增一筆安全事件。
+  - 使用者可以從固定選單中選擇事件類型。
+  - 使用者需要輸入 user、IP 與 message。
+  - 新增後的事件會被加入 `loadedEvents` 與 `EventQueue`。
+  - 新增事件後，使用者需要重新執行 `Analyze events`，才能更新風險分數與排序結果。
 
 - `3. Analyze events`
-  - 使用 `EventAnalyzer` 分析已載入的所有事件。
+  - 使用 `EventAnalyzer` 分析已載入或新增的所有事件。
   - 根據事件類型、使用者名稱與訊息內容計算風險分數。
   - 根據風險分數設定風險等級與 priority。
+  - 每次分析前會重置舊的分析結果，避免 reasons 重複累積。
 
 - `4. Show Top-K alerts`
   - 使用 `MinHeap` 顯示前 5 筆最高風險事件。
-  - 使用前需要先執行 `Load sample events` 與 `Analyze events`。
+  - 使用前需要先執行 `Load sample events` 或 `Add custom event`，並接著執行 `Analyze events`。
   - 若尚未載入或尚未分析，系統會顯示提示訊息。
 
 - `5. Show full ranking`
   - 使用 `EventSorter` 與 Merge Sort 顯示完整風險排序。
   - 排序依據為 `riskScore`，風險分數越高者越前面。
-  - 使用前需要先執行 `Load sample events` 與 `Analyze events`。
+  - 使用前需要先載入或新增事件，並執行 `Analyze events`。
 
 - `6. Export report`
   - 使用 `ReportGenerator` 將分析結果輸出到 `output/sample_report.txt`。
   - 報告內容包含總事件數、完整風險排序、每筆事件詳細資訊與複雜度摘要。
-  - 使用前需要先執行 `Load sample events` 與 `Analyze events`。
+  - 使用前需要先載入或新增事件，並執行 `Analyze events`。
+  - 報告檔案屬於程式執行後產生的輸出結果，目前不一定會被 Git 追蹤。
 
 - `7. Show complexity summary`
   - 在終端機顯示目前專案主要資料結構與演算法的時間複雜度摘要。
@@ -116,7 +123,8 @@ HeapGuard-Lite/
 - 負責顯示終端機選單。
 - 負責讀取使用者輸入。
 - 負責根據使用者選項呼叫對應功能。
-- 目前已接上事件載入、事件分析、Top-K 高風險事件、完整風險排序、報告輸出與複雜度摘要功能。
+- 目前已接上事件載入、自訂事件新增、事件分析、Top-K 高風險事件、完整風險排序、報告輸出與複雜度摘要功能。
+- 也負責處理基本防呆，例如尚未載入資料、尚未分析資料、輸入非數字或輸入超出範圍時的提示。
 
 ### SecurityEvent.java
 
@@ -124,6 +132,7 @@ HeapGuard-Lite/
 - 儲存事件編號、事件類型、使用者、IP、訊息內容、風險分數、優先權與風險等級。
 - 提供簡短摘要與詳細摘要輸出。
 - 其中 `priority = 100 - riskScore`，用來配合 Min Heap 取出高風險事件。
+- 提供 `resetAnalysis()`，讓事件可以在重新分析前清空舊的風險分數、風險等級與原因紀錄。
 
 ### EventAnalyzer.java
 
@@ -131,12 +140,15 @@ HeapGuard-Lite/
 - 根據風險分數判斷風險等級。
 - 目前採用簡化的 rule-based scoring 規則。
 - 可偵測的條件包含事件類型、admin/root 使用者、password 關鍵字、`.exe`、`OR 1=1` 與 `<script>` 等。
+- 在每次分析事件前，會呼叫 `resetAnalysis()`，避免重複分析造成原因紀錄重複。
 
 ### EventQueue.java
 
-- 使用 Queue 的概念管理待處理事件。
+- 使用 Queue 的概念保存待處理事件。
 - 提供 `enqueue`、`dequeue`、`peek`、`isEmpty`、`size`、`clear` 等基本操作。
 - 用來模擬事件依照發生順序進入系統。
+- 目前在載入範例資料與新增自訂事件後，事件會被加入 `EventQueue`。
+- 目前分析流程主要仍透過 `loadedEvents` 進行，後續可改成從 `EventQueue` 逐筆取出事件進行分析。
 - 目前使用 `ArrayList` 作為內部儲存結構。
 
 ### EventParser.java
@@ -262,7 +274,7 @@ java -cp src TestEventSorter
 java -cp src Main
 ```
 
-- 在終端機中依序輸入：
+- 使用本地範例事件時，可在終端機中依序輸入：
 
 ```text
 1
@@ -282,6 +294,61 @@ java -cp src Main
 5：顯示完整風險排序
 6：輸出分析報告
 0：離開程式
+```
+
+- 使用自訂事件時，可在終端機中依序操作：
+
+```text
+2：新增自訂事件
+3：分析事件
+4：顯示前 5 筆最高風險事件
+5：顯示完整風險排序
+6：輸出分析報告
+0：離開程式
+```
+
+## 自訂事件輸入範例
+
+- 使用者選擇 `2. Add custom event` 後，系統會要求選擇事件類型：
+
+```text
+Select event type:
+1. PHISHING_SMS
+2. WEAK_PASSWORD
+3. SUSPICIOUS_FILE
+4. LOGIN_FAIL
+5. SQL_INJECTION
+6. XSS_ATTEMPT
+7. NORMAL_LOGIN
+0. Cancel
+```
+
+- 例如輸入：
+
+```text
+4
+admin
+192.168.1.99
+failed login attempt with password=123456
+```
+
+- 代表新增一筆事件：
+
+```text
+Type: LOGIN_FAIL
+User: admin
+IP: 192.168.1.99
+Message: failed login attempt with password=123456
+```
+
+- 分析後可能得到：
+
+```text
+LOGIN_FAIL: +40
+admin user: +20
+password keyword: +20
+Total risk score: 80
+Risk level: CRITICAL
 ```
 
 ## 範例事件資料格式
@@ -400,9 +467,10 @@ priority = 100 - riskScore
 ## 資料結構應用
 
 - Queue
-  - 用來模擬事件依照發生順序進入系統。
-  - 符合先進先出 FIFO 的資料處理邏輯。
+  - 用來保存載入後或新增後的事件。
+  - 符合先進先出 FIFO 的資料處理概念。
   - 目前已完成 `EventQueue` 初版。
+  - 目前事件會被加入 Queue，但分析流程主要仍透過 `loadedEvents` 進行，後續可改成從 Queue 逐筆 dequeue 分析。
 
 - Min Heap
   - 用來取出最高風險事件。
@@ -471,13 +539,12 @@ priority = 100 - riskScore
 - 本專案不會連接網路、資料庫或外部 API。
 - 本專案不會執行真正的攻擊偵測。
 - 本專案的主要重點是資料結構應用與 Java 實作練習。
-- 目前 `Add custom event` 尚未接上正式輸入流程。
-- 目前尚未加入 Stack-based bracket checking。
+- 目前 Stack-based bracket checking 尚未實作。
 - 目前尚未加入更完整的 password weakness detection。
+- 目前 Top-K 的 K 值固定為 5，尚未開放使用者自行輸入。
 
 ## 未來改進方向
 
-- 將 `Add custom event` 接上正式使用者輸入流程。
 - 新增 `BracketChecker`，使用 Stack 檢查括號是否平衡。
 - 新增 `PasswordChecker`，進行簡化弱密碼判斷。
 - 補充更多測試資料與測試案例。
